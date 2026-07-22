@@ -17,23 +17,77 @@ interface Form {
 // Predefined templates
 const TEMPLATES = [
     {
-        id: 'loan-application',
-        title: 'Application Form',
-        description: 'Standard loan application with personal and financial details',
-        icon: '💰',
+        id: 'vendor-proprietorship',
+        title: 'Vendor Application (Proprietorship)',
+        description: 'Vendor onboarding application for proprietorship entities',
+        icon: '🏪',
     },
     {
-        id: 'employee-onboarding',
-        title: 'Employee Onboarding',
-        description: 'New hire information and documentation',
-        icon: '👤',
+        id: 'vendor-partnership',
+        title: 'Vendor Application (Partnership)',
+        description: 'Vendor onboarding application for partnership firms',
+        icon: '🏪',
     },
     {
-        id: 'survey-form',
-        title: 'Survey Form',
-        description: 'Customizable survey with multiple question types',
-        icon: '📊',
+        id: 'vendor-llp',
+        title: 'Vendor Application (LLP)',
+        description: 'Vendor onboarding application for LLP entities',
+        icon: '🏪',
     },
+    {
+        id: 'vendor-private-limited',
+        title: 'Vendor Application (Private Limited)',
+        description: 'Vendor onboarding application for private limited companies',
+        icon: '🏪',
+    },
+    {
+        id: 'vendor-public-limited',
+        title: 'Vendor Application (Public Limited)',
+        description: 'Vendor onboarding application for public limited companies',
+        icon: '🏪',
+    },
+    {
+        id: 'financier-proprietorship',
+        title: 'Financier Application (Proprietorship)',
+        description: 'Financier onboarding application for proprietorship entities',
+        icon: '🏦',
+    },
+    {
+        id: 'financier-partnership',
+        title: 'Financier Application (Partnership)',
+        description: 'Financier onboarding application for partnership firms',
+        icon: '🏦',
+    },
+    {
+        id: 'financier-llp',
+        title: 'Financier Application (LLP)',
+        description: 'Financier onboarding application for LLP entities',
+        icon: '🏦',
+    },
+    {
+        id: 'financier-private-limited',
+        title: 'Financier Application (Private Limited)',
+        description: 'Financier onboarding application for private limited companies',
+        icon: '🏦',
+    },
+    {
+        id: 'financier-public-limited',
+        title: 'Financier Application (Public Limited)',
+        description: 'Financier onboarding application for public limited companies',
+        icon: '🏦',
+    },
+    // {
+    //     id: 'employee-onboarding',
+    //     title: 'Employee Onboarding',
+    //     description: 'New hire information and documentation',
+    //     icon: '👤',
+    // },
+    // {
+    //     id: 'survey-form',
+    //     title: 'Survey Form',
+    //     description: 'Customizable survey with multiple question types',
+    //     icon: '📊',
+    // },
 ];
 
 // Force dynamic rendering (required for protected routes)

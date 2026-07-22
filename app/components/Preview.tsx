@@ -213,7 +213,7 @@ export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ pages, 
     }, [pages]);
 
     const cssVariables = {
-        '--page-bg': backgroundColor || '#d1eff1'
+        '--page-bg': backgroundColor || '#ffffff'
     } as React.CSSProperties;
 
     const findFieldParent = (fieldId: string) => {

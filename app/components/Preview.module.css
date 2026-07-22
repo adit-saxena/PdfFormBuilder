@@ -12,7 +12,7 @@
     line-height: 1.4;
     font-size: 10pt;
     /* Use CSS var for background, default to light teal */
-    background-color: var(--page-bg, #d1eff1);
+    background-color: var(--page-bg, #ffffff);
     width: 210mm;
     /* Exact A4 Height for Preview Fidelity */
     height: 297mm;
@@ -307,7 +307,7 @@
     .page {
         padding: 15mm !important;
         /* Keep original padding for print */
-        background-color: var(--page-bg, #d1eff1) !important;
+        background-color: var(--page-bg, #ffffff) !important;
         width: 210mm;
         height: 297mm;
         /* Force height */
