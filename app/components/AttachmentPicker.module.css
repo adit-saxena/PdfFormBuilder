@@ -1,0 +1,108 @@
+.hiddenInput {
+    display: none;
+}
+
+.attachButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    padding: 0;
+    color: #555;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.attachButton:hover:not(:disabled) {
+    background: #ececec;
+    color: #1a1a1a;
+}
+
+.attachButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.attachButton:focus-visible {
+    outline: 2px solid #1a1a1a;
+    outline-offset: 2px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    max-width: 100%;
+    padding: 0.25rem 0.375rem 0.25rem 0.3125rem;
+    font-size: 0.78rem;
+    color: #333;
+    background: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+}
+
+.chipIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    background: #e6f7f6;
+    color: #03635f;
+}
+
+.chipName {
+    min-width: 0;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.chipSize {
+    flex-shrink: 0;
+    color: #8a8a8a;
+}
+
+.chipRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    padding: 0;
+    color: #8a8a8a;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.chipRemove:hover {
+    color: #1a1a1a;
+    background: #f0f0f0;
+}
+
+.error {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #a8071a;
+}

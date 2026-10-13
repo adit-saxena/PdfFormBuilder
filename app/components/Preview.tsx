@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import styles from './Preview.module.css';
 import { Page, Section, AllocatedPage, HeaderConfig, FormField } from './types';
 import { Check, Image as ImageIcon, PenTool } from 'lucide-react';
+import { DtxLogo } from './DtxLogo';
+
+// Default page background: a very light tint (~7%) of the KredX teal #32BFBD.
+export const DEFAULT_PAGE_BG = '#F1FAFA';
 
 interface PreviewProps {
     pages: Page[];
@@ -213,7 +217,7 @@ export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ pages, 
     }, [pages]);
 
     const cssVariables = {
-        '--page-bg': backgroundColor || '#ffffff'
+        '--page-bg': backgroundColor || DEFAULT_PAGE_BG
     } as React.CSSProperties;
 
     const findFieldParent = (fieldId: string) => {
@@ -246,13 +250,7 @@ export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ pages, 
                                 <div key="header" className={styles.headerContainer}>
                                     <div className={styles.header}>
                                         <div className={styles.logoSection}>
-                                            <div className={styles.dtxLogo}>
-                                                {header.logoText.replace(header.logoHighlight, '')}
-                                                <span className={styles.dtxHighlight}>{header.logoHighlight}</span>
-                                            </div>
-                                            <div style={{ display: 'flex', flexDirection: 'column', fontWeight: 'bold', lineHeight: '1.1', fontSize: '0.85rem', color: '#555' }}>
-                                                {header.subHeader && header.subHeader.map((line, li) => <span key={li}>{line}</span>)}
-                                            </div>
+                                            <DtxLogo className={styles.dtxLogo} />
                                         </div>
                                         <div className={styles.subHeader}>
                                             {header.companyName}

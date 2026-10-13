@@ -1,29 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { FormBuilder } from '../components/FormBuilder';
 
-// Force dynamic rendering (required for protected routes)
+// Force dynamic rendering (required for client-side auth)
 export const dynamic = 'force-dynamic';
 
 export default function EditorPage() {
-    const { user, loading } = useAuth();
-    const router = useRouter();
-    const [isReady, setIsReady] = useState(false);
+    const { loading } = useAuth();
 
-    useEffect(() => {
-        if (!loading) {
-            if (!user) {
-                router.push('/login');
-            } else {
-                setIsReady(true);
-            }
-        }
-    }, [user, loading, router]);
-
-    if (loading || !isReady) {
+    if (loading) {
         return (
             <div style={{
                 minHeight: '100vh',

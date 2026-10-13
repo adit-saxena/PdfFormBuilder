@@ -8,17 +8,24 @@ interface AuthContextType {
     user: User | null;
     session: Session | null;
     loading: boolean;
-    signIn: (email: string, password: string) => Promise<{ error: any }>;
-    signUp: (email: string, password: string) => Promise<{ error: any }>;
+    signIn: (email: string, password: string) => Promise<AuthResult>;
+    signUp: (email: string, password: string) => Promise<AuthResult>;
     signOut: () => Promise<void>;
+}
+
+export interface AuthResult {
+    error: string | null;
+    user: User | null;
+    // True when sign-up succeeded but the email must be confirmed before a session exists.
+    needsConfirmation?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
     session: null,
     loading: true,
-    signIn: async () => ({ error: null }),
-    signUp: async () => ({ error: null }),
+    signIn: async () => ({ error: null, user: null }),
+    signUp: async () => ({ error: null, user: null }),
     signOut: async () => { },
 });
 
@@ -36,8 +43,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+        // Reuse the stored session, or silently sign in as an anonymous guest.
+        // Requires "Anonymous sign-ins" to be enabled in Supabase (Auth → Providers).
+        supabase.auth.getSession().then(async ({ data: { session } }: { data: { session: Session | null } }) => {
+            if (!session) {
+                const { data, error } = await supabase.auth.signInAnonymously();
+                if (error) {
+                    console.error('Anonymous sign-in failed:', error.message);
+                }
+                session = data.session;
+            }
             setSession(session);
             setUser(session?.user ?? null);
             setLoading(false);
@@ -49,26 +64,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
             setSession(session);
             setUser(session?.user ?? null);
-            setLoading(false);
         });
 
         return () => subscription.unsubscribe();
     }, []);
 
-    const signIn = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-        return { error };
+    const signIn = async (email: string, password: string): Promise<AuthResult> => {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        return { error: error?.message ?? null, user: data.user };
     };
 
-    const signUp = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-        });
-        return { error };
+    const signUp = async (email: string, password: string): Promise<AuthResult> => {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        return {
+            error: error?.message ?? null,
+            user: data.session ? data.user : null,
+            needsConfirmation: !error && !data.session,
+        };
     };
 
     const signOut = async () => {

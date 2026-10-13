@@ -33,6 +33,8 @@ export const HeaderConfigSchema = z.object({
     subHeader: z.array(z.string().max(100)).max(10),
     companyName: z.string().max(200),
     formTitle: z.string().max(300),
+    formName: z.string().max(300).optional(),
+    tags: z.array(z.string().max(40)).max(10).optional(),
     disclaimer: z.string().max(1000),
     applicationDate: z.string().max(50).optional(),
     applicationNumber: z.string().max(100).optional(),

@@ -4,6 +4,8 @@ import { Page, HeaderConfig } from './types';
 import { Share2, Check, Copy, Loader2 } from 'lucide-react';
 import { FormStructureSchema, sanitizeFormStructure } from './validation';
 import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from './AuthModal';
+import { User } from '@supabase/supabase-js';
 
 interface PublishButtonProps {
     pages: Page[];
@@ -15,11 +17,14 @@ export const PublishButton: React.FC<PublishButtonProps> = ({ pages, headerConfi
     const [isPublishing, setIsPublishing] = useState(false);
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
-    const { user } = useAuth();
+    const [showAuth, setShowAuth] = useState(false);
+    const { user: authUser } = useAuth();
 
-    const handlePublish = async () => {
+    // `signedInUser` lets the auth modal resume publishing before context state has re-rendered.
+    const handlePublish = async (signedInUser?: User) => {
+        const user = signedInUser ?? authUser;
         if (!user) {
-            alert('You must be logged in to publish forms');
+            setShowAuth(true);
             return;
         }
 
@@ -169,8 +174,9 @@ export const PublishButton: React.FC<PublishButtonProps> = ({ pages, headerConfi
     }
 
     return (
+        <>
         <button
-            onClick={handlePublish}
+            onClick={() => handlePublish()}
             disabled={isPublishing}
             style={{
                 display: 'flex',
@@ -199,5 +205,14 @@ export const PublishButton: React.FC<PublishButtonProps> = ({ pages, headerConfi
             {isPublishing ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
             {isPublishing ? 'Publishing...' : 'Publish & Share'}
         </button>
+        {showAuth && <AuthModal
+            intent="publish"
+            onClose={() => setShowAuth(false)}
+            onAuthenticated={(signedInUser) => {
+                setShowAuth(false);
+                handlePublish(signedInUser);
+            }}
+        />}
+        </>
     );
 };

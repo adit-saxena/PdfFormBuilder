@@ -1,18 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sidebar } from './Sidebar';
-import { Preview } from './Preview';
+import { Sidebar, FormNameCard } from './Sidebar';
+import { AgentPanel } from './AgentPanel';
+import { Preview, DEFAULT_PAGE_BG } from './Preview';
 import styles from './FormBuilder.module.css';
 import { Page, Section, FormField, HeaderConfig, FieldType } from './types';
 import { useReactToPrint } from 'react-to-print';
-import { Printer, Undo, Redo } from 'lucide-react';
+import { Printer, Undo, Redo, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { PublishButton } from './PublishButton';
 import { SaveButton } from './SaveButton';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useHistory } from '../hooks/useHistory';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '../../lib/supabaseClient';
+import { DEFAULT_HEADER_CONFIG } from './defaults';
 
-type ApplicantType = 'Vendor' | 'Financier';
+type ApplicantType = 'Buyer' | 'Seller' | 'Financier';
 type EntityType = 'Proprietorship' | 'Partnership' | 'LLP' | 'Private Limited' | 'Public Limited';
 
 interface TemplateConfig {
@@ -105,27 +107,29 @@ const DEFAULT_PAGES: Page[] = [
     }
 ];
 
-const DEFAULT_HEADER_CONFIG: HeaderConfig = {
-    logoText: 'DTX',
-    logoHighlight: 'X',
-    subHeader: ['DOMESTIC', 'TRADE', 'EXCHANGE'],
-    companyName: 'KredX Platform Private Limited',
-    formTitle: 'Application Form',
-    disclaimer: 'All fields are mandatory. If a field is not applicable, please write "NA" — do not leave any fields blank.'
-};
-
 const TEMPLATE_MAP: Record<string, { applicantType: ApplicantType; entityType: EntityType }> = {
-    'vendor-proprietorship': { applicantType: 'Vendor', entityType: 'Proprietorship' },
-    'vendor-partnership': { applicantType: 'Vendor', entityType: 'Partnership' },
-    'vendor-llp': { applicantType: 'Vendor', entityType: 'LLP' },
-    'vendor-private-limited': { applicantType: 'Vendor', entityType: 'Private Limited' },
-    'vendor-public-limited': { applicantType: 'Vendor', entityType: 'Public Limited' },
+    'buyer-proprietorship': { applicantType: 'Buyer', entityType: 'Proprietorship' },
+    'buyer-partnership': { applicantType: 'Buyer', entityType: 'Partnership' },
+    'buyer-llp': { applicantType: 'Buyer', entityType: 'LLP' },
+    'buyer-private-limited': { applicantType: 'Buyer', entityType: 'Private Limited' },
+    'buyer-public-limited': { applicantType: 'Buyer', entityType: 'Public Limited' },
+    'seller-proprietorship': { applicantType: 'Seller', entityType: 'Proprietorship' },
+    'seller-partnership': { applicantType: 'Seller', entityType: 'Partnership' },
+    'seller-llp': { applicantType: 'Seller', entityType: 'LLP' },
+    'seller-private-limited': { applicantType: 'Seller', entityType: 'Private Limited' },
+    'seller-public-limited': { applicantType: 'Seller', entityType: 'Public Limited' },
+    // Old "vendor" links: a vendor on the platform is the seller.
+    'vendor-proprietorship': { applicantType: 'Seller', entityType: 'Proprietorship' },
+    'vendor-partnership': { applicantType: 'Seller', entityType: 'Partnership' },
+    'vendor-llp': { applicantType: 'Seller', entityType: 'LLP' },
+    'vendor-private-limited': { applicantType: 'Seller', entityType: 'Private Limited' },
+    'vendor-public-limited': { applicantType: 'Seller', entityType: 'Public Limited' },
     'financier-proprietorship': { applicantType: 'Financier', entityType: 'Proprietorship' },
     'financier-partnership': { applicantType: 'Financier', entityType: 'Partnership' },
     'financier-llp': { applicantType: 'Financier', entityType: 'LLP' },
     'financier-private-limited': { applicantType: 'Financier', entityType: 'Private Limited' },
     'financier-public-limited': { applicantType: 'Financier', entityType: 'Public Limited' },
-    'loan-application': { applicantType: 'Vendor', entityType: 'Private Limited' },
+    'loan-application': { applicantType: 'Seller', entityType: 'Private Limited' },
 };
 
 const getSignatoryLabel = (entityType: EntityType) => {
@@ -142,7 +146,7 @@ const buildApplicationTemplate = (applicantType: ApplicantType, entityType: Enti
         id: 'basic-details',
         title: 'Basic Entity Details',
         fields: [
-            { id: 'app-type', label: 'Applicant Type', value: applicantType, type: 'checkbox', options: ['Vendor', 'Financier'] },
+            { id: 'app-type', label: 'Applicant Type', value: applicantType, type: 'checkbox', options: ['Buyer', 'Seller', 'Financier'] },
             { id: 'et', label: 'Entity Type', value: entityType, type: 'checkbox', options: ['Proprietorship', 'Partnership', 'LLP', 'Private Limited', 'Public Limited'] },
             { id: 'en', label: 'Entity Name', value: '', type: 'text', boxCount: 30 },
             { id: 'ra', label: 'Registered Address', value: '', type: 'text' },
@@ -264,10 +268,29 @@ const buildApplicationTemplate = (applicantType: ApplicantType, entityType: Enti
         };
     })();
 
-    const applicantDetails: Section = applicantType === 'Vendor'
+    const buyerDetails: Section = {
+        id: 'buyer-business',
+        title: 'Buyer Business Details',
+        fields: [
+            { id: 'b-gs', label: 'Primary Goods / Services Procured', value: '', type: 'text', boxCount: 30 },
+            { id: 'b-yib', label: 'Years in Business', value: '', type: 'number' },
+            { id: 'b-s1-name', label: 'Top Supplier 1 Name', value: '', type: 'text', boxCount: 25 },
+            { id: 'b-s1-gst', label: 'Top Supplier 1 GSTIN', value: '', type: 'text', boxCount: 15 },
+            { id: 'b-s2-name', label: 'Top Supplier 2 Name', value: '', type: 'text', boxCount: 25 },
+            { id: 'b-s2-gst', label: 'Top Supplier 2 GSTIN', value: '', type: 'text', boxCount: 15 },
+            { id: 'b-acp', label: 'Average Credit Period from Suppliers (days)', value: '', type: 'number' },
+            { id: 'b-amp', label: 'Average Monthly Purchases (INR)', value: '', type: 'number' },
+            { id: 'b-aiv', label: 'Average Invoice Value (INR)', value: '', type: 'number' },
+            { id: 'b-ap', label: 'Approval Process for Supplier Invoices', value: '', type: 'checkbox', options: ['Single level', 'Multi level'] },
+        ]
+    };
+
+    const applicantDetails: Section = applicantType === 'Buyer'
+        ? buyerDetails
+        : applicantType === 'Seller'
         ? {
             id: 'vendor-business',
-            title: 'Vendor Business Details',
+            title: 'Seller Business Details',
             fields: [
                 { id: 'v-gs', label: 'Primary Goods / Services', value: '', type: 'text', boxCount: 30 },
                 { id: 'v-yib', label: 'Years in Business', value: '', type: 'number' },
@@ -345,6 +368,7 @@ const buildApplicationTemplate = (applicantType: ApplicantType, entityType: Enti
         ...DEFAULT_HEADER_CONFIG,
         formTitle: `${applicantType} Application Form (${entityType})`,
         formName: `${applicantType} - ${entityType} Application Form`,
+        tags: [applicantType, entityType],
     };
 
     return { pages, headerConfig };
@@ -377,6 +401,11 @@ export function FormBuilder() {
         templateConfig?.pages || DEFAULT_PAGES,
         templateConfig?.headerConfig || DEFAULT_HEADER_CONFIG
     );
+
+    // ?mode=agent (from the dashboard prompt) opens the Agent tab and drafts the form from the prompt.
+    const startInAgent = searchParams?.get('mode') === 'agent';
+    const [sidebarTab, setSidebarTab] = useState<'manual' | 'agent'>(startInAgent ? 'agent' : 'manual');
+    const [agentBusy, setAgentBusy] = useState(false);
 
     useEffect(() => {
         if (formId) return;
@@ -590,7 +619,7 @@ export function FormBuilder() {
         }));
     };
 
-    const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+    const [backgroundColor, setBackgroundColor] = useState(DEFAULT_PAGE_BG);
 
     // Show loading state while form is being loaded
     if (isLoadingForm) {
@@ -623,6 +652,33 @@ export function FormBuilder() {
     return (
         <div className={styles.container}>
             <aside className={styles.sidebar}>
+                <div className={styles.sidebarTop}>
+                    <FormNameCard headerConfig={headerConfig} onUpdateHeader={updateHeader} />
+                    <div className={styles.modeTabs} role="tablist" aria-label="Editing mode">
+                        <button
+                            role="tab"
+                            aria-selected={sidebarTab === 'manual'}
+                            className={styles.modeTab}
+                            onClick={() => setSidebarTab('manual')}
+                        >
+                            <SlidersHorizontal size={15} />
+                            Manual
+                        </button>
+                        <button
+                            role="tab"
+                            aria-selected={sidebarTab === 'agent'}
+                            className={styles.modeTab}
+                            onClick={() => setSidebarTab('agent')}
+                        >
+                            <Sparkles size={15} />
+                            Agent
+                            {agentBusy && <span className={styles.busyDot} aria-label="working" />}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Both tabs stay mounted so the chat and scroll position survive switching. */}
+                <div className={styles.sidebarBody} hidden={sidebarTab !== 'manual'}>
                 <Sidebar
                     pages={pages}
                     headerConfig={headerConfig}
@@ -638,8 +694,16 @@ export function FormBuilder() {
                     onReorderSections={reorderSections}
                     onUpdateHeader={updateHeader}
                 />
-
-                <div style={{ paddingBottom: '2rem' }}></div>
+                </div>
+                <div className={styles.agentBody} hidden={sidebarTab !== 'agent'}>
+                    <AgentPanel
+                        pages={pages}
+                        headerConfig={headerConfig}
+                        onApply={pushState}
+                        onBusyChange={setAgentBusy}
+                        autoStart={startInAgent}
+                    />
+                </div>
             </aside>
             <main className={styles.main}>
                 {/* Header with Background */}
@@ -708,7 +772,7 @@ export function FormBuilder() {
                 </div>
 
                 {/* Preview Area */}
-                <div className={styles.previewArea}>
+                <div className={`${styles.previewArea} ${agentBusy ? styles.previewBusy : ''}`} aria-busy={agentBusy}>
                     <Preview
                         pages={pages}
                         headerConfig={headerConfig}

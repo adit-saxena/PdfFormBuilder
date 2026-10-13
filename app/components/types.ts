@@ -31,6 +31,7 @@ export interface HeaderConfig {
   disclaimer: string;
   applicationDate?: string; // Optional editable field
   applicationNumber?: string; // Optional editable field
+  tags?: string[]; // Category tags shown on dashboard cards and used for filtering
 }
 
 export interface Page {

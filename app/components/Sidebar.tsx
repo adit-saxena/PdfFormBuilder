@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Plus, GripVertical, Trash2, Menu, FileText, ChevronDown, ChevronRight, Settings, Type, Square, Image as ImageIcon, PenTool, X } from 'lucide-react';
+import { Plus, GripVertical, Trash2, FileText, ChevronRight, Settings, Type, Square, PenTool, X, Pencil, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import styles from './Sidebar.module.css';
 import { Page, Section, FormField, HeaderConfig, FieldType } from './types';
+import { TagEditor } from './TagEditor';
 
 interface SidebarProps {
     pages: Page[];
@@ -44,21 +46,17 @@ const SortableFieldItem = ({ field, sectionId, pageId, onUpdateField, onRemoveFi
                 <GripVertical size={16} />
             </div>
             <div className={styles.cardContent}>
-                <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-1 rounded">{field.type}</span>
-                </div>
-                <div className={styles.inputWrapper}>
-                    <input
-                        className={styles.inputLabel}
-                        value={field.label}
-                        onChange={(e) => onUpdateField(pageId, sectionId, field.id, { label: e.target.value })}
-                        placeholder="Field Label"
-                        onPointerDown={(e) => e.stopPropagation()}
-                    />
-                </div>
+                <span className={styles.typeBadge}>{field.type}</span>
+                <input
+                    className={styles.inputLabel}
+                    value={field.label}
+                    onChange={(e) => onUpdateField(pageId, sectionId, field.id, { label: e.target.value })}
+                    placeholder="Field Label"
+                    onPointerDown={(e) => e.stopPropagation()}
+                />
 
                 {/* Help Text Toggle and Input */}
-                <div className="mt-2" onPointerDown={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                <div className={styles.field} onPointerDown={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                     {field.helpText === undefined ? (
                         <button
                             type="button"
@@ -68,14 +66,14 @@ const SortableFieldItem = ({ field, sectionId, pageId, onUpdateField, onRemoveFi
                                 onUpdateField(pageId, sectionId, field.id, { helpText: '' });
                             }}
                         >
-                            <Plus size={10} /> Add Description / Help Text
+                            <Plus size={12} /> Add Description / Help Text
                         </button>
                     ) : (
-                        <div className="flex flex-col gap-1">
-                            <label className="text-[10px] uppercase text-muted font-bold">Helping Text / description</label>
-                            <div className="flex items-start gap-1">
+                        <div className={styles.field}>
+                            <label className={styles.fieldLabel}>Helping Text / description</label>
+                            <div className={styles.helpTextRow}>
                                 <textarea
-                                    className="flex-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-2 py-1 outline-none focus:border-accent focus:bg-white transition-colors min-h-[40px]"
+                                    className={`${styles.textInput} ${styles.helpTextArea}`}
                                     value={field.helpText}
                                     onChange={(e) => onUpdateField(pageId, sectionId, field.id, { helpText: e.target.value })}
                                     placeholder="e.g. As per Aadhaar card"
@@ -108,11 +106,11 @@ const SortableFieldItem = ({ field, sectionId, pageId, onUpdateField, onRemoveFi
                 )}
 
                 {field.type === 'checkbox' && (
-                    <div className="mt-2">
-                        <label className="text-xs text-secondary font-medium block mb-1">Options:</label>
+                    <div className={styles.field}>
+                        <label className={styles.fieldLabel}>Options</label>
 
                         {/* List of current options as tags */}
-                        <div className={styles.flexRow} style={{ flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                        <div className={styles.optionList}>
                             {(field.options || []).map((opt: string, idx: number) => (
                                 <div key={idx} className={styles.optionTag}>
                                     <span className={styles.optionTagText}>{opt}</span>
@@ -133,9 +131,9 @@ const SortableFieldItem = ({ field, sectionId, pageId, onUpdateField, onRemoveFi
                         </div>
 
                         {/* Add new option input */}
-                        <div className="flex items-center gap-1">
+                        <div className={styles.inlineRow}>
                             <input
-                                className={styles.inputValue}
+                                className={styles.textInput}
                                 style={{ flex: 1 }}
                                 value={newOption}
                                 onChange={(e) => setNewOption(e.target.value)}
@@ -161,11 +159,11 @@ const SortableFieldItem = ({ field, sectionId, pageId, onUpdateField, onRemoveFi
                 )}
 
                 {['text', 'number', 'date'].includes(field.type) && (
-                    <div className="flex items-center gap-2 mt-2">
-                        <label className="text-xs text-secondary font-medium whitespace-nowrap">Boxes:</label>
+                    <div className={styles.inlineRow}>
+                        <label className={styles.subLabel}>Boxes</label>
                         <input
                             type="number"
-                            className="w-16 text-xs bg-slate-100 p-1 rounded border border-slate-200"
+                            className={`${styles.textInput} ${styles.smallInput}`}
                             value={field.boxCount || ''}
                             onChange={(e) => onUpdateField(pageId, sectionId, field.id, { boxCount: parseInt(e.target.value) || undefined })}
                             placeholder="Auto"
@@ -175,24 +173,24 @@ const SortableFieldItem = ({ field, sectionId, pageId, onUpdateField, onRemoveFi
                 )}
 
                 {field.type === 'signature' && (
-                    <div className="flex flex-col gap-2 mt-2">
-                        <label className="flex items-center gap-2 cursor-pointer">
+                    <div className={styles.checkList}>
+                        <label className={styles.checkRow}>
                             <input
                                 type="checkbox"
                                 checked={field.showPhoto}
                                 onChange={(e) => onUpdateField(pageId, sectionId, field.id, { showPhoto: e.target.checked })}
                                 onPointerDown={(e) => e.stopPropagation()}
                             />
-                            <span className="text-xs text-secondary font-medium">Include Photo Box</span>
+                            <span>Include Photo Box</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
+                        <label className={styles.checkRow}>
                             <input
                                 type="checkbox"
                                 checked={field.showSignature}
                                 onChange={(e) => onUpdateField(pageId, sectionId, field.id, { showSignature: e.target.checked })}
                                 onPointerDown={(e) => e.stopPropagation()}
                             />
-                            <span className="text-xs text-secondary font-medium">Include Signature Box</span>
+                            <span>Include Signature Box</span>
                         </label>
                     </div>
                 )}
@@ -229,12 +227,17 @@ const SortableSectionItem = ({ section, pageId, onUpdateSection, onUpdateField, 
 
     return (
         <div ref={setNodeRef} style={style} className={styles.section}>
-            <div className={styles.sectionHeader}>
-                <div className="cursor-grab mr-2 text-secondary" {...attributes} {...listeners}>
-                    <Menu size={16} />
+            <div className={`${styles.sectionHeader} ${isExpanded ? styles.sectionHeaderOpen : ''}`}>
+                <div className={styles.dragHandle} {...attributes} {...listeners} title="Drag to reorder">
+                    <GripVertical size={16} />
                 </div>
-                <button onClick={() => setIsExpanded(!isExpanded)} className="mr-1 text-secondary">
-                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className={styles.chevronButton}
+                    aria-expanded={isExpanded}
+                    aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
+                >
+                    <ChevronRight size={16} className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`} />
                 </button>
                 <input
                     value={section.title}
@@ -242,13 +245,13 @@ const SortableSectionItem = ({ section, pageId, onUpdateSection, onUpdateField, 
                     className={styles.sectionTitleInput}
                     onPointerDown={(e) => e.stopPropagation()}
                 />
-                <button onClick={() => onRemoveSection(pageId, section.id)} className={styles.deleteButton} style={{ marginLeft: 'auto' }}>
-                    <Trash2 size={14} />
+                <button onClick={() => onRemoveSection(pageId, section.id)} className={styles.deleteButton} title="Delete section" aria-label="Delete section">
+                    <Trash2 size={15} />
                 </button>
             </div>
 
             {isExpanded && (
-                <div className="pl-2 border-l-2 border-slate-100 ml-2 mt-2">
+                <div className={styles.sectionBody}>
                     <SortableContext items={section.fields.map((f: any) => f.id)} strategy={verticalListSortingStrategy}>
                         {section.fields.map((field: any) => (
                             <SortableFieldItem
@@ -262,12 +265,12 @@ const SortableSectionItem = ({ section, pageId, onUpdateSection, onUpdateField, 
                         ))}
                     </SortableContext>
 
-                    <div className="relative">
+                    <div className={styles.addFieldWrap}>
                         <button
                             className={styles.addButton}
                             onClick={() => setShowAddMenu(!showAddMenu)}
                         >
-                            <Plus size={16} /> Add Field
+                            <Plus size={15} /> Add Field
                         </button>
 
                         {showAddMenu && (
@@ -290,6 +293,57 @@ const SortableSectionItem = ({ section, pageId, onUpdateSection, onUpdateField, 
     );
 };
 
+// Back to the dashboard + the editable form name. Shared by the Manual and Agent tabs.
+export function FormNameCard({ headerConfig, onUpdateHeader }: { headerConfig: HeaderConfig; onUpdateHeader: (updates: Partial<HeaderConfig>) => void }) {
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+    return (
+        <div className={styles.nameRow}>
+            <Link href="/dashboard" className={styles.backButton} aria-label="Back to dashboard" title="Back to dashboard">
+                <ArrowLeft size={18} />
+            </Link>
+            <div
+                className={styles.formTitleCard}
+                onDoubleClick={() => setIsEditingTitle(true)}
+                title="Double-click to rename this form"
+            >
+                <div className={styles.formTitleText}>
+                    <span className={styles.eyebrow}>Form name</span>
+                    {isEditingTitle ? (
+                        <input
+                            type="text"
+                            value={headerConfig.formName || 'Untitled Form'}
+                            onChange={(e) => onUpdateHeader({ formName: e.target.value })}
+                            onBlur={() => setIsEditingTitle(false)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    setIsEditingTitle(false);
+                                }
+                            }}
+                            autoFocus
+                            className={styles.formTitleInput}
+                            placeholder="Enter form name..."
+                        />
+                    ) : (
+                        <span className={styles.formTitle}>{headerConfig.formName || 'Untitled Form'}</span>
+                    )}
+                </div>
+                {!isEditingTitle && (
+                    <button
+                        type="button"
+                        className={styles.editButton}
+                        onClick={() => setIsEditingTitle(true)}
+                        aria-label="Rename form"
+                        title="Rename form"
+                    >
+                        <Pencil size={14} />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+}
+
 export const Sidebar: React.FC<SidebarProps> = ({
     pages,
     headerConfig,
@@ -311,7 +365,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
 
     const [headerExpanded, setHeaderExpanded] = useState(false);
-    const [isEditingTitle, setIsEditingTitle] = useState(false);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -345,114 +398,80 @@ export const Sidebar: React.FC<SidebarProps> = ({
     };
 
     return (
-        <div className="w-full pb-20">
-            <div className={styles.sidebarHeader}>
-                <div
-                    className={styles.logoPlaceholder}
-                    onDoubleClick={() => setIsEditingTitle(true)}
-                    style={{ cursor: isEditingTitle ? 'text' : 'pointer' }}
-                    title="Double-click to rename this form"
-                >
-                    <div style={{ width: 24, height: 24, background: '#1a1a1a', borderRadius: 6 }}></div>
-                    {isEditingTitle ? (
-                        <input
-                            type="text"
-                            value={headerConfig.formName || 'Untitled Form'}
-                            onChange={(e) => onUpdateHeader({ formName: e.target.value })}
-                            onBlur={() => setIsEditingTitle(false)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    setIsEditingTitle(false);
-                                }
-                            }}
-                            autoFocus
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                outline: 'none',
-                                color: 'white',
-                                fontSize: '1rem',
-                                fontWeight: 600,
-                                width: '100%',
-                                fontFamily: 'inherit'
-                            }}
-                            placeholder="Enter form name..."
-                        />
-                    ) : (
-                        <span>{headerConfig.formName || 'Untitled Form'}</span>
-                    )}
-                </div>
-            </div>
+        <div className={styles.root}>
+            <TagEditor tags={headerConfig.tags ?? []} onChange={(tags) => onUpdateHeader({ tags })} />
 
             {/* Global Form Settings (Header Config) */}
-            <div className="mb-6 border-b border-slate-200 pb-4">
+            <div className={styles.settingsCard}>
                 <button
                     onClick={() => setHeaderExpanded(!headerExpanded)}
                     className={styles.settingsButton}
+                    aria-expanded={headerExpanded}
                 >
-                    {headerExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                    <Settings size={16} /> Form Settings
+                    <ChevronRight size={16} className={`${styles.chevron} ${headerExpanded ? styles.chevronOpen : ''}`} />
+                    <Settings size={16} className={styles.settingsIcon} /> Form Settings
                 </button>
 
                 {headerExpanded && (
-                    <div className="px-4 space-y-3">
-                        <div>
-                            <label className="text-[10px] uppercase text-muted font-bold block mb-1">
+                    <div className={styles.settingsPanel}>
+                        <label className={styles.field}>
+                            <span className={styles.fieldLabel}>
                                 Form Title (displayed on PDF)
-                            </label>
+                            </span>
                             <input
-                                className={styles.inputLabel}
+                                className={styles.textInput}
                                 value={headerConfig.formTitle}
                                 onChange={(e) => onUpdateHeader({ formTitle: e.target.value })}
                             />
-                        </div>
-                        <div>
-                            <label className="text-[10px] uppercase text-muted font-bold block mb-1">Company Name</label>
+                        </label>
+                        <label className={styles.field}>
+                            <span className={styles.fieldLabel}>Company Name</span>
                             <input
-                                className={styles.inputLabel}
+                                className={styles.textInput}
                                 value={headerConfig.companyName}
                                 onChange={(e) => onUpdateHeader({ companyName: e.target.value })}
                             />
-                        </div>
-                        <div>
-                            <label className="text-[10px] uppercase text-muted font-bold block mb-1">Disclaimer</label>
+                        </label>
+                        <label className={styles.field}>
+                            <span className={styles.fieldLabel}>Disclaimer</span>
                             <textarea
-                                className={styles.inputLabel}
+                                className={styles.textInput}
                                 value={headerConfig.disclaimer}
                                 onChange={(e) => onUpdateHeader({ disclaimer: e.target.value })}
                                 rows={2}
                             />
-                        </div>
-                        <div>
-                            <label className="text-[10px] uppercase text-muted font-bold block mb-1">Application Date</label>
+                        </label>
+                        <label className={styles.field}>
+                            <span className={styles.fieldLabel}>Application Date</span>
                             <input
-                                className={styles.inputLabel}
+                                className={styles.textInput}
                                 value={headerConfig.applicationDate || ''}
                                 onChange={(e) => onUpdateHeader({ applicationDate: e.target.value })}
                                 placeholder="DD/MM/YYYY"
                             />
-                        </div>
-                        <div>
-                            <label className="text-[10px] uppercase text-muted font-bold block mb-1">Application Number</label>
+                        </label>
+                        <label className={styles.field}>
+                            <span className={styles.fieldLabel}>Application Number</span>
                             <input
-                                className={styles.inputLabel}
+                                className={styles.textInput}
                                 value={headerConfig.applicationNumber || ''}
                                 onChange={(e) => onUpdateHeader({ applicationNumber: e.target.value })}
                                 placeholder="Enter number"
                             />
-                        </div>
+                        </label>
                     </div>
                 )}
             </div>
 
+            <div className={styles.pages}>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 {pages.map((page, pageIndex) => (
-                    <div key={page.id} className="mb-8 border-b-4 border-slate-100 pb-4">
+                    <div key={page.id} className={styles.page}>
                         <div className={styles.pageHeader}>
                             <span className={styles.pageHeaderLabel}><FileText size={14} /> Page {pageIndex + 1}</span>
                             {pages.length > 1 && (
-                                <button onClick={() => onRemovePage(page.id)} title="Delete Page" className={styles.deleteButton}>
-                                    <Trash2 size={14} />
+                                <button onClick={() => onRemovePage(page.id)} title="Delete Page" aria-label="Delete page" className={styles.deleteButton}>
+                                    <Trash2 size={15} />
                                 </button>
                             )}
                         </div>
@@ -477,18 +496,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             onClick={() => onAddSection(page.id)}
                             className={styles.addButton}
                         >
-                            <Plus size={16} /> Add Section
+                            <Plus size={15} /> Add Section
                         </button>
                     </div>
                 ))}
             </DndContext>
+            </div>
 
-            <button
-                onClick={onAddPage}
-                className={styles.addButton}
-                style={{ marginTop: '1rem', borderStyle: 'solid', borderWidth: '2px', fontWeight: '600' }}
-            >
-                <Plus size={18} /> Add New Page
+            <button onClick={onAddPage} className={styles.addPageButton}>
+                <Plus size={16} /> Add New Page
             </button>
         </div>
     );

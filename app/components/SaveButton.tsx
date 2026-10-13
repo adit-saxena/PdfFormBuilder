@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Save, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from './AuthModal';
+import { User } from '@supabase/supabase-js';
 import { Page, HeaderConfig } from './types';
 import { sanitizeFormStructure } from './validation';
 
@@ -18,19 +20,22 @@ interface SaveButtonProps {
 export function SaveButton({ pages, headerConfig, backgroundColor, formId, onSaved }: SaveButtonProps) {
     const [isSaving, setIsSaving] = useState(false);
     const [saved, setSaved] = useState(false);
-    const { user } = useAuth();
+    const [showAuth, setShowAuth] = useState(false);
+    const { user: authUser } = useAuth();
 
-    const handleSave = async () => {
-        if (!user) {
-            alert('Please log in to save forms');
-            return;
-        }
-
+    // `signedInUser` lets the auth modal resume saving before context state has re-rendered.
+    const handleSave = async (signedInUser?: User) => {
         // Use formName if set, otherwise fall back to formTitle
         const fileName = headerConfig.formName || headerConfig.formTitle || 'Untitled Form';
 
         if (!fileName || fileName.trim() === '' || fileName === 'Untitled Form') {
             alert('Please enter a form name (double-click on the title in the sidebar) before saving');
+            return;
+        }
+
+        const user = signedInUser ?? authUser;
+        if (!user) {
+            setShowAuth(true);
             return;
         }
 
@@ -117,8 +122,9 @@ export function SaveButton({ pages, headerConfig, backgroundColor, formId, onSav
     }
 
     return (
+        <>
         <button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={isSaving}
             style={{
                 display: 'flex',
@@ -149,5 +155,14 @@ export function SaveButton({ pages, headerConfig, backgroundColor, formId, onSav
             <Save size={18} />
             {isSaving ? 'Saving...' : 'Save Form'}
         </button>
+        {showAuth && <AuthModal
+            intent="save"
+            onClose={() => setShowAuth(false)}
+            onAuthenticated={(signedInUser) => {
+                setShowAuth(false);
+                handleSave(signedInUser);
+            }}
+        />}
+        </>
     );
 }

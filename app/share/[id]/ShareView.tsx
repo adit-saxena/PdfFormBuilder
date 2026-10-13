@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { Page, HeaderConfig, FormField, Section } from '../../components/types';
-import { Preview } from '../../components/Preview';
+import { Preview, DEFAULT_PAGE_BG } from '../../components/Preview';
 import { useReactToPrint } from 'react-to-print';
 import { Printer } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
@@ -46,7 +46,7 @@ export function ShareView({
 
     const [pages, setPages] = useState<Page[]>(mergedPages);
     const [headerConfig, setHeaderConfig] = useState<HeaderConfig>(initialHeaderConfig);
-    const [backgroundColor, setBackgroundColor] = useState(initialBackgroundColor || '#d1eff1');
+    const [backgroundColor, setBackgroundColor] = useState(initialBackgroundColor || DEFAULT_PAGE_BG);
     const [isSaving, setIsSaving] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showSaveConfirm, setShowSaveConfirm] = useState(false);

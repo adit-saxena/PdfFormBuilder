@@ -12,7 +12,7 @@
     line-height: 1.4;
     font-size: 10pt;
     /* Use CSS var for background, default to light teal */
-    background-color: var(--page-bg, #ffffff);
+    background-color: var(--page-bg, #F1FAFA);
     width: 210mm;
     /* Exact A4 Height for Preview Fidelity */
     height: 297mm;
@@ -42,19 +42,9 @@
     gap: 0.5rem;
 }
 
-/* DTX Logo Simulation */
 .dtxLogo {
-    font-size: 3rem;
-    font-weight: 900;
-    line-height: 1;
-    color: #333;
-    display: flex;
-    align-items: center;
-}
-
-.dtxHighlight {
-    color: #2bb7c3;
-    /* Teal accent */
+    display: block;
+    flex-shrink: 0;
 }
 
 .subHeader {
@@ -307,7 +297,7 @@
     .page {
         padding: 15mm !important;
         /* Keep original padding for print */
-        background-color: var(--page-bg, #ffffff) !important;
+        background-color: var(--page-bg, #F1FAFA) !important;
         width: 210mm;
         height: 297mm;
         /* Force height */
