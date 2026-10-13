@@ -3,6 +3,7 @@ import styles from './Preview.module.css';
 import { Page, Section, AllocatedPage, HeaderConfig, FormField } from './types';
 import { Check, Image as ImageIcon, PenTool } from 'lucide-react';
 import { DtxLogo } from './DtxLogo';
+import { roboto } from '../fonts';
 
 // Default page background: a very light tint (~7%) of the KredX teal #32BFBD.
 export const DEFAULT_PAGE_BG = '#F1FAFA';
@@ -239,7 +240,7 @@ export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(({ pages, 
     };
 
     return (
-        <div ref={ref} className={styles.documentContainer} style={cssVariables}>
+        <div ref={ref} className={`${styles.documentContainer} ${roboto.variable}`} style={cssVariables}>
             {allocatedPages.map((page, i) => (
                 <div key={i} className={styles.page}>
 

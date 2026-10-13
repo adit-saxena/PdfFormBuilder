@@ -120,31 +120,15 @@
 .headerContent {
     max-width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     gap: 2rem;
 }
 
-.headerLeft {
-    flex: 1;
-    min-width: 0;
-}
 
 
 
-.headerTitle {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
-    letter-spacing: -0.01em;
-}
 
-.headerSubtitle {
-    font-size: 0.875rem;
-    color: #606060;
-    margin: 0.25rem 0 0 0;
-}
 
 .headerRight {
     display: flex;

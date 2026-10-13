@@ -709,13 +709,6 @@ export function FormBuilder() {
                 {/* Header with Background */}
                 <div className={styles.header}>
                     <div className={styles.headerContent}>
-                        <div className={styles.headerLeft}>
-                            <h1 className={styles.headerTitle}>Form Editor</h1>
-                            <p className={styles.headerSubtitle}>
-                                {headerConfig.formName || 'Untitled Form'}
-                            </p>
-                        </div>
-
                         <div className={styles.headerRight}>
                             <div className={styles.undoRedoGroup}>
                                 <button
